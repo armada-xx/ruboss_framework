@@ -530,9 +530,11 @@ package org.ruboss.controllers {
         Ruboss.log.debug("cache size for: " + name + " will exceed the max threshold of: " + threshold + 
           ", slicing at: " + sliceStart);
         items = new ModelsCollection(current.source.slice(sliceStart));
-      } else {
-        items = current;
-      }
+        current.source = current.source.slice(sliceStart);
+       } else {
+         items = current;
+       }
+
 
       for each (var model:Object in models) {
         if (items.hasItem(model)) {
@@ -543,7 +545,9 @@ package org.ruboss.controllers {
         processNtoNRelationships(model);
       }
 
-      cache[name] = items;
+      var items:ModelsCollection = cache[name] as ModelsCollection;
+      //this causes the ModelsCollection to broadcast a RESET event
+      items.source = toCache;
       dispatchEvent(new CacheUpdateEvent(name));      
     }
     
