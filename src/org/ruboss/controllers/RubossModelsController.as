@@ -481,7 +481,8 @@ package org.ruboss.controllers {
       state.waiting[fqn] = true;
 
       metadata = setCurrentPage(metadata, page);
-                
+      var collection:ModelsCollection = cache[fqn] as ModelsCollection;
+      collection.dispatchStateChange(ModelsCollection.STATE_LOADING);
       invokeServiceIndex(onIndex, targetServiceId, clazz, fetchDependencies, afterCallback, metadata, nestedBy);
     }
     
@@ -500,7 +501,8 @@ package org.ruboss.controllers {
       metadata = setCurrentPage(metadata, page);
         
       state.pages[fqn] = page;
-        
+      var collection:ModelsCollection = cache[fqn] as ModelsCollection;
+      collection.dispatchStateChange(ModelsCollection.STATE_PAGING);
       invokeServiceIndex(onPage, targetServiceId, clazz, fetchDependencies, afterCallback, metadata, nestedBy);
     }
 
@@ -511,9 +513,12 @@ package org.ruboss.controllers {
         processNtoNRelationships(item);
       }
 
-      var items:ModelsCollection = new ModelsCollection(models);
-      cache[name] = items;
-      dispatchEvent(new CacheUpdateEvent(name));      
+      var collection:ModelsCollection = cache[name] as ModelsCollection;
+      //this causes the ModelsCollection to broadcast a RESET event
+      collection.source = models;
+      collection.dispatchStateChange(ModelsCollection.STATE_READY);
+      dispatchEvent(new CacheUpdateEvent(name)); 
+     
     }
     
     public function onPage(models:Array):void {
@@ -545,9 +550,10 @@ package org.ruboss.controllers {
         processNtoNRelationships(model);
       }
 
-      var items:ModelsCollection = cache[name] as ModelsCollection;
+      var collection:ModelsCollection = cache[name] as ModelsCollection;
       //this causes the ModelsCollection to broadcast a RESET event
-      items.source = toCache;
+      collection.source = models;
+      collection.dispatchStateChange(ModelsCollection.STATE_READY);
       dispatchEvent(new CacheUpdateEvent(name));      
     }
     

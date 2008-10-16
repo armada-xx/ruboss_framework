@@ -13,18 +13,31 @@
  ******************************************************************************/
 package org.ruboss.models {
   import org.ruboss.collections.RubossCollection;
-
+  import org.ruboss.events.ModelStateChangeEvent;
+    
   /**
    * Adds a few handy methods to ArrayCollection class to simplify working 
    * with model objects.
    */
   public class ModelsCollection extends RubossCollection {
     
+    public static const STATE_ERROR:String      = "error";
+    public static const STATE_INIT:String       = "init";
+    public static const STATE_FIRST_LOAD:String = "firstLoad";
+    public static const STATE_LOADING:String    = "loading";
+    public static const STATE_PAGING:String    = "loading";
+    public static const STATE_READY:String      = "ready";
+  
     /** 
      * @see mx.collections.ArrayCollection
      */
     public function ModelsCollection(source:Array = null) {
       super(source);
+    }
+    
+    
+    public function dispatchStateChange(newState:String):void{
+      dispatchEvent(new ModelStateChangeEvent(newState));
     }
     
     /**
